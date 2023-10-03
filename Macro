@@ -1,0 +1,46 @@
+Sub MergeTwoExcelFiles()
+    Dim FolderPath As String
+    Dim Filename As String
+    Dim DestinationFile As Workbook
+    Dim OneSheet As Worksheet, TwoSheet As Worksheet
+    
+    ' Define the folder path
+    FolderPath = "C:\Path\To\Your\Folder\"
+    
+    ' Create a new destination workbook
+    Set DestinationFile = Workbooks.Add
+    Set OneSheet = DestinationFile.Sheets(1)
+    OneSheet.Name = "One"
+    Set TwoSheet = DestinationFile.Sheets.Add(After:=OneSheet)
+    TwoSheet.Name = "Two"
+    
+    ' Get the first Excel file in the folder
+    Filename = Dir(FolderPath & "*.xlsx")
+    
+    ' Loop through all Excel files in the folder
+    Do While Filename <> "" And DestinationFile.Sheets.Count <= 2
+        ' Open the source workbook
+        Workbooks.Open FolderPath & Filename
+        
+        ' Copy data from the source sheet to the appropriate tab in the destination file
+        If DestinationFile.Sheets.Count = 2 Then
+            DestinationFile.Sheets(2).Cells.Copy Destination:=TwoSheet.Cells(1, 1)
+        Else
+            DestinationFile.Sheets(1).Cells.Copy Destination:=OneSheet.Cells(1, 1)
+        End If
+        
+        ' Close the source workbook without saving changes
+        Workbooks(Filename).Close SaveChanges:=False
+        
+        ' Get the next Excel file in the folder
+        Filename = Dir
+    Loop
+    
+    ' Save the destination file with the merged data
+    DestinationFile.SaveAs FolderPath & "MergedFile.xlsx"
+    
+    ' Close the destination file
+    DestinationFile.Close SaveChanges:=False
+    
+    MsgBox "Files merged successfully!"
+End Sub
